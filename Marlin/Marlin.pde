@@ -614,42 +614,78 @@ void process_commands()
       // Home X axis to its bottom endstop.
       if (home_all_axis || code_seen(axis_codes[X_AXIS])) {
           feedrate = homing_feedrate[X_AXIS];
-          plan_buffer_line(250 + HOMING_OFFSET, 250, 250, current_position[E_AXIS], feedrate, active_extruder);
+          current_position[X_AXIS] = 250 + X_HOME_RETRACT_MM;
+          current_position[Y_AXIS] = 250 + X_HOME_RETRACT_MM - HOMING_OFFSET;
+          current_position[Z_AXIS] = 250 + X_HOME_RETRACT_MM - HOMING_OFFSET;
+          plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS],
+                           current_position[E_AXIS], feedrate, active_extruder);
           plan_buffer_line(HOMING_OFFSET, 0, 0, current_position[E_AXIS], feedrate/60, active_extruder);
           st_synchronize();
-          
-          plan_set_position(250, 250 - HOMING_OFFSET, 250 - HOMING_OFFSET, current_position[E_AXIS]);
-          plan_buffer_line(250 + HOMING_OFFSET, 250, 250, current_position[E_AXIS], feedrate/30, active_extruder);
+
+          plan_set_position(250,
+                            home_all_axis ? 250 - HOMING_OFFSET : st_get_position(Y_AXIS) / axis_steps_per_unit[Y_AXIS],
+                            home_all_axis ? 250 - HOMING_OFFSET : st_get_position(Z_AXIS) / axis_steps_per_unit[Z_AXIS],
+                            current_position[E_AXIS]);
+          plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS],
+                           current_position[E_AXIS], feedrate/30, active_extruder);
           st_synchronize();
           endstops_hit_on_purpose();
       }
       
+      if (home_all_axis) {
+          current_position[Y_AXIS] = 250 + Y_HOME_RETRACT_MM;
+          plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS],
+                           current_position[E_AXIS], feedrate, active_extruder);
+      }
+
       // Home Y axis to its bottom endstop.
       if (home_all_axis || code_seen(axis_codes[Y_AXIS])) {
           feedrate = homing_feedrate[Y_AXIS];
-          plan_buffer_line(250, 250 + HOMING_OFFSET, 250, current_position[E_AXIS], feedrate, active_extruder);
+          current_position[X_AXIS] = 250 + Y_HOME_RETRACT_MM - HOMING_OFFSET;
+          current_position[Y_AXIS] = 250 + Y_HOME_RETRACT_MM;
+          current_position[Z_AXIS] = 250 + Y_HOME_RETRACT_MM - HOMING_OFFSET;
+          plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS],
+                           current_position[E_AXIS], feedrate, active_extruder);
           plan_buffer_line(0, HOMING_OFFSET, 0, current_position[E_AXIS], feedrate/60, active_extruder);
           st_synchronize();
 
-          plan_set_position(250 - HOMING_OFFSET, 250, 250 - HOMING_OFFSET, current_position[E_AXIS]);
-          plan_buffer_line(250, 250 + HOMING_OFFSET, 250, current_position[E_AXIS], feedrate/30, active_extruder);
+          plan_set_position(st_get_position(X_AXIS) / axis_steps_per_unit[X_AXIS],
+                            250,
+                            home_all_axis ? 250 - HOMING_OFFSET : st_get_position(Z_AXIS) / axis_steps_per_unit[Z_AXIS],
+                            current_position[E_AXIS]);
+          plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS],
+                           current_position[E_AXIS], feedrate/30, active_extruder);
           st_synchronize();
           endstops_hit_on_purpose();
       }
-      
+
+      if (home_all_axis) {
+          current_position[Z_AXIS] = 250 + Z_HOME_RETRACT_MM;
+          plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS],
+                           current_position[E_AXIS], feedrate, active_extruder);
+      }
+
       // Home Z axis to its bottom endstop.
       if (home_all_axis || code_seen(axis_codes[Z_AXIS])) {
           feedrate = homing_feedrate[Z_AXIS];
-          plan_buffer_line(250, 250, 250 + HOMING_OFFSET, current_position[E_AXIS], feedrate, active_extruder);
+          current_position[X_AXIS] = 250 + Z_HOME_RETRACT_MM - HOMING_OFFSET;
+          current_position[Y_AXIS] = 250 + Z_HOME_RETRACT_MM - HOMING_OFFSET;
+          current_position[Z_AXIS] = 250 + Z_HOME_RETRACT_MM;
+          plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS],
+                           current_position[E_AXIS], feedrate, active_extruder);
           plan_buffer_line(0, 0, HOMING_OFFSET, current_position[E_AXIS], feedrate/60, active_extruder);
           st_synchronize();
 
-          plan_set_position(250 - HOMING_OFFSET, 250 - HOMING_OFFSET, 250, current_position[E_AXIS]);
-          plan_buffer_line(250, 250, 250 + HOMING_OFFSET, current_position[E_AXIS], feedrate/30, active_extruder);
+          plan_set_position(st_get_position(X_AXIS) / axis_steps_per_unit[X_AXIS],
+                            st_get_position(Y_AXIS) / axis_steps_per_unit[Y_AXIS],
+                            250,
+                            current_position[E_AXIS]);
+          plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS],
+                           current_position[E_AXIS], feedrate/30, active_extruder);
           st_synchronize();
           endstops_hit_on_purpose();
       }
-      
+
       #ifdef ENDSTOPS_ONLY_FOR_HOMING
         enable_endstops(false);
       #endif
