@@ -39,21 +39,22 @@
 
 #define VERSION_STRING  "1.0.0 RC2"
 
-#define DELTA_HOMING_OFFSET 128 // mm
-#define DELTA_SEGMENTS_PER_MM 10 // make delta curves from many straight lines
+#define DELTA_HOMING_OFFSET 128.0 // mm
+#define DELTA_DIAGONAL_ROD 250.0 // mm
+#define DELTA_SEGMENTS_PER_MM 5 // make delta curves from many straight lines
 #define DELTA_ZERO_OFFSET -9 // print surface is lower than bottom endstops
 
 #define SIN_60 0.8660254037844386
 #define COS_60 0.5
-#define DELTA_RADIUS 175-33-18
+#define DELTA_RADIUS (175.0-33.0-18.0)
 #define DELTA_TOWER1_X -SIN_60*DELTA_RADIUS
 #define DELTA_TOWER1_Y -COS_60*DELTA_RADIUS
-#define DELTA_TOWER2_X -SIN_60*DELTA_RADIUS
+#define DELTA_TOWER2_X SIN_60*DELTA_RADIUS
 #define DELTA_TOWER2_Y -COS_60*DELTA_RADIUS
-#define DELTA_TOWER3_X 0
+#define DELTA_TOWER3_X 0.0
 #define DELTA_TOWER3_Y DELTA_RADIUS
 
-// look here for descriptions of gcodes: http://linuxcnc.org/handbook/gcode/g-code.html
+// look here for descriptions of gcodes: ht  tp://linuxcnc.org/handbook/gcode/g-code.html
 // http://objects.reprap.org/wiki/Mendel_User_Manual:_RepRapGCodes
 
 //Implemented Codes
@@ -592,19 +593,19 @@ void process_commands()
 
       home_all_axis = !((code_seen(axis_codes[0])) || (code_seen(axis_codes[1])) || (code_seen(axis_codes[2])));
       if (home_all_axis) {  // First move up to all top endstops.
-        feedrate = homing_feedrate[X_AXIS] * 10;
+        feedrate = homing_feedrate[X_AXIS];
         // Move all axes up until one of them hits an endstop.
         plan_set_position(0, 0, 0, current_position[E_AXIS]);
-        plan_buffer_line(X_MAX_LENGTH, Y_MAX_LENGTH, Z_MAX_LENGTH, current_position[E_AXIS], feedrate/60, active_extruder);
+        plan_buffer_line(X_MAX_LENGTH, Y_MAX_LENGTH, Z_MAX_LENGTH, current_position[E_AXIS], 4*feedrate/60, active_extruder);
         // In case X hit the endstop first, move Y and Z up.
         plan_set_position(0, 0, 0, current_position[E_AXIS]);
-        plan_buffer_line(0, Y_MAX_LENGTH, Z_MAX_LENGTH, current_position[E_AXIS], feedrate/60, active_extruder);
+        plan_buffer_line(0, Y_MAX_LENGTH, Z_MAX_LENGTH, current_position[E_AXIS], 2*feedrate/60, active_extruder);
         // In case Y hit the endstop first, move X and Z up.
         plan_set_position(0, 0, 0, current_position[E_AXIS]);
-        plan_buffer_line(X_MAX_LENGTH, 0, Z_MAX_LENGTH, current_position[E_AXIS], feedrate/60, active_extruder);
+        plan_buffer_line(X_MAX_LENGTH, 0, Z_MAX_LENGTH, current_position[E_AXIS], 2*feedrate/60, active_extruder);
         // In case Z hit the endstop first, move X and Y up.
         plan_set_position(0, 0, 0, current_position[E_AXIS]);
-        plan_buffer_line(X_MAX_LENGTH, Y_MAX_LENGTH, 0, current_position[E_AXIS], feedrate/60, active_extruder);
+        plan_buffer_line(X_MAX_LENGTH, Y_MAX_LENGTH, 0, current_position[E_AXIS], 2*feedrate/60, active_extruder);
         // Move X up all the way.
         plan_set_position(0, 0, 0, current_position[E_AXIS]);
         plan_buffer_line(X_MAX_LENGTH, 0, 0, current_position[E_AXIS], feedrate/60, active_extruder);
@@ -623,17 +624,17 @@ void process_commands()
       // Home X axis to its bottom endstop.
       if (home_all_axis || code_seen(axis_codes[X_AXIS])) {
           feedrate = homing_feedrate[X_AXIS];
-          current_position[X_AXIS] = 250 + X_HOME_RETRACT_MM;
-          current_position[Y_AXIS] = 250 + X_HOME_RETRACT_MM - DELTA_HOMING_OFFSET;
-          current_position[Z_AXIS] = 250 + X_HOME_RETRACT_MM - DELTA_HOMING_OFFSET;
+          current_position[X_AXIS] = DELTA_DIAGONAL_ROD + X_HOME_RETRACT_MM;
+          current_position[Y_AXIS] = DELTA_DIAGONAL_ROD + X_HOME_RETRACT_MM - DELTA_HOMING_OFFSET;
+          current_position[Z_AXIS] = DELTA_DIAGONAL_ROD + X_HOME_RETRACT_MM - DELTA_HOMING_OFFSET;
           plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS],
                            current_position[E_AXIS], feedrate, active_extruder);
           plan_buffer_line(DELTA_HOMING_OFFSET, 0, 0, current_position[E_AXIS], feedrate/60, active_extruder);
           st_synchronize();
 
-          plan_set_position(250,
-                            home_all_axis ? 250 - DELTA_HOMING_OFFSET : st_get_position(Y_AXIS) / axis_steps_per_unit[Y_AXIS],
-                            home_all_axis ? 250 - DELTA_HOMING_OFFSET : st_get_position(Z_AXIS) / axis_steps_per_unit[Z_AXIS],
+          plan_set_position(DELTA_DIAGONAL_ROD,
+                            home_all_axis ? DELTA_DIAGONAL_ROD - DELTA_HOMING_OFFSET : st_get_position(Y_AXIS) / axis_steps_per_unit[Y_AXIS],
+                            home_all_axis ? DELTA_DIAGONAL_ROD - DELTA_HOMING_OFFSET : st_get_position(Z_AXIS) / axis_steps_per_unit[Z_AXIS],
                             current_position[E_AXIS]);
           plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS],
                            current_position[E_AXIS], feedrate/30, active_extruder);
@@ -641,26 +642,22 @@ void process_commands()
           endstops_hit_on_purpose();
       }
       
-      if (home_all_axis) {
-          current_position[Y_AXIS] = 250 + Y_HOME_RETRACT_MM;
-          plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS],
-                           current_position[E_AXIS], feedrate, active_extruder);
-      }
+      plan_buffer_line(DELTA_DIAGONAL_ROD, DELTA_DIAGONAL_ROD, DELTA_DIAGONAL_ROD, current_position[E_AXIS], feedrate, active_extruder);
 
       // Home Y axis to its bottom endstop.
       if (home_all_axis || code_seen(axis_codes[Y_AXIS])) {
           feedrate = homing_feedrate[Y_AXIS];
-          current_position[X_AXIS] = 250 + Y_HOME_RETRACT_MM - DELTA_HOMING_OFFSET;
-          current_position[Y_AXIS] = 250 + Y_HOME_RETRACT_MM;
-          current_position[Z_AXIS] = 250 + Y_HOME_RETRACT_MM - DELTA_HOMING_OFFSET;
+          current_position[X_AXIS] = DELTA_DIAGONAL_ROD + Y_HOME_RETRACT_MM - DELTA_HOMING_OFFSET;
+          current_position[Y_AXIS] = DELTA_DIAGONAL_ROD + Y_HOME_RETRACT_MM;
+          current_position[Z_AXIS] = DELTA_DIAGONAL_ROD + Y_HOME_RETRACT_MM - DELTA_HOMING_OFFSET;
           plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS],
                            current_position[E_AXIS], feedrate, active_extruder);
           plan_buffer_line(0, DELTA_HOMING_OFFSET, 0, current_position[E_AXIS], feedrate/60, active_extruder);
           st_synchronize();
 
           plan_set_position(st_get_position(X_AXIS) / axis_steps_per_unit[X_AXIS],
-                            250,
-                            home_all_axis ? 250 - DELTA_HOMING_OFFSET : st_get_position(Z_AXIS) / axis_steps_per_unit[Z_AXIS],
+                            DELTA_DIAGONAL_ROD,
+                            home_all_axis ? DELTA_DIAGONAL_ROD - DELTA_HOMING_OFFSET : st_get_position(Z_AXIS) / axis_steps_per_unit[Z_AXIS],
                             current_position[E_AXIS]);
           plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS],
                            current_position[E_AXIS], feedrate/30, active_extruder);
@@ -668,18 +665,14 @@ void process_commands()
           endstops_hit_on_purpose();
       }
 
-      if (home_all_axis) {
-          current_position[Z_AXIS] = 250 + Z_HOME_RETRACT_MM;
-          plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS],
-                           current_position[E_AXIS], feedrate, active_extruder);
-      }
+      plan_buffer_line(DELTA_DIAGONAL_ROD, DELTA_DIAGONAL_ROD, DELTA_DIAGONAL_ROD, current_position[E_AXIS], feedrate, active_extruder);
 
       // Home Z axis to its bottom endstop.
       if (home_all_axis || code_seen(axis_codes[Z_AXIS])) {
           feedrate = homing_feedrate[Z_AXIS];
-          current_position[X_AXIS] = 250 + Z_HOME_RETRACT_MM - DELTA_HOMING_OFFSET;
-          current_position[Y_AXIS] = 250 + Z_HOME_RETRACT_MM - DELTA_HOMING_OFFSET;
-          current_position[Z_AXIS] = 250 + Z_HOME_RETRACT_MM;
+          current_position[X_AXIS] = DELTA_DIAGONAL_ROD + Z_HOME_RETRACT_MM - DELTA_HOMING_OFFSET;
+          current_position[Y_AXIS] = DELTA_DIAGONAL_ROD + Z_HOME_RETRACT_MM - DELTA_HOMING_OFFSET;
+          current_position[Z_AXIS] = DELTA_DIAGONAL_ROD + Z_HOME_RETRACT_MM;
           plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS],
                            current_position[E_AXIS], feedrate, active_extruder);
           plan_buffer_line(0, 0, DELTA_HOMING_OFFSET, current_position[E_AXIS], feedrate/60, active_extruder);
@@ -687,13 +680,20 @@ void process_commands()
 
           plan_set_position(st_get_position(X_AXIS) / axis_steps_per_unit[X_AXIS],
                             st_get_position(Y_AXIS) / axis_steps_per_unit[Y_AXIS],
-                            250,
+                            DELTA_DIAGONAL_ROD,
                             current_position[E_AXIS]);
           plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS],
                            current_position[E_AXIS], feedrate/30, active_extruder);
           st_synchronize();
           endstops_hit_on_purpose();
       }
+
+      plan_buffer_line(DELTA_DIAGONAL_ROD, DELTA_DIAGONAL_ROD, DELTA_DIAGONAL_ROD, current_position[E_AXIS], feedrate, active_extruder);
+      st_synchronize();  
+
+      current_position[X_AXIS] = 0.0;
+      current_position[Y_AXIS] = 0.0;
+      current_position[Z_AXIS] = 0.0;
 
       #ifdef ENDSTOPS_ONLY_FOR_HOMING
         enable_endstops(false);
@@ -1381,54 +1381,51 @@ void prepare_move() {
   for(int8_t i=0; i < NUM_AXIS; i++) {
     difference[i] = destination[i] - current_position[i];
   }
-  float cartesian_mm = sqrt(square(difference[X_AXIS]) +
-			    square(difference[Y_AXIS]) +
-			    square(difference[Z_AXIS]));
+  float cartesian_mm = sqrt(sq(difference[X_AXIS]) +
+			    sq(difference[Y_AXIS]) +
+			    sq(difference[Z_AXIS]));
   if ( cartesian_mm < 0.000001 ) {
     cartesian_mm = difference[E_AXIS];
   }
   if ( cartesian_mm < 0.000001 ) {
     return;
   }
-  SERIAL_ECHO_START;
-  SERIAL_ECHOPGM("cartesian_mm=");
-  SERIAL_ECHOLN(cartesian_mm);
+  // SERIAL_ECHOPGM("cartesian_mm="); SERIAL_ECHOLN(cartesian_mm);
   // float inverse_mm = 1.0/cartesian_mm;  // Avoid multiple divides
-  int steps = 2; // max(1, int(DELTA_SEGMENTS_PER_MM * cartesian_mm));
+  int steps = max(1, int(DELTA_SEGMENTS_PER_MM * cartesian_mm));
   float delta[3];
   for (int s = 1; s <= steps; s++) {
     float fraction = float(s) / float(steps);
-    SERIAL_ECHOPGM("fraction=");
-    SERIAL_ECHOLN(fraction);
+    /*
+    SERIAL_ECHOPGM("step="); SERIAL_ECHO(s);
+    SERIAL_ECHOPGM(" fraction="); SERIAL_ECHOLN(fraction);
+    */
     for(int8_t i=0; i < NUM_AXIS; i++) {
       destination[i] = current_position[i] + difference[i] * fraction;
     }
-    SERIAL_ECHOPGM("destination x=");
-    SERIAL_ECHO(destination[X_AXIS]);
-    SERIAL_ECHOPGM(" y=");
-    SERIAL_ECHO(destination[Y_AXIS]);
-    SERIAL_ECHOPGM(" z=");
-    SERIAL_ECHO(destination[Z_AXIS]);
-    SERIAL_ECHOPGM(" e=");
-    SERIAL_ECHOLN(destination[E_AXIS]);
-    delta[X_AXIS] = sqrt(250*250
+    /*
+    SERIAL_ECHOPGM("destination x="); SERIAL_ECHO(destination[X_AXIS]);
+    SERIAL_ECHOPGM(" y="); SERIAL_ECHO(destination[Y_AXIS]);
+    SERIAL_ECHOPGM(" z="); SERIAL_ECHO(destination[Z_AXIS]);
+    SERIAL_ECHOPGM(" e="); SERIAL_ECHOLN(destination[E_AXIS]);
+    */
+    delta[X_AXIS] = sqrt(sq(DELTA_DIAGONAL_ROD)
 			 - sq(DELTA_TOWER1_X-destination[X_AXIS])
 			 - sq(DELTA_TOWER1_Y-destination[Y_AXIS])
 			 ) + DELTA_ZERO_OFFSET + destination[Z_AXIS];
-    delta[Y_AXIS] = sqrt(250*250
-			 - sq(DELTA_TOWER2_X-destination[X_AXIS])
+    delta[Y_AXIS] = sqrt(sq(DELTA_DIAGONAL_ROD)
+    			 - sq(DELTA_TOWER2_X-destination[X_AXIS])
 			 - sq(DELTA_TOWER2_Y-destination[Y_AXIS])
 			 ) + DELTA_ZERO_OFFSET + destination[Z_AXIS];
-    delta[Z_AXIS] = sqrt(250*250
+    delta[Z_AXIS] = sqrt(sq(DELTA_DIAGONAL_ROD)
 			 - sq(DELTA_TOWER3_X-destination[X_AXIS])
 			 - sq(DELTA_TOWER3_Y-destination[Y_AXIS])
 			 ) + DELTA_ZERO_OFFSET + destination[Z_AXIS];
-    SERIAL_ECHOPGM("delta x=");
-    SERIAL_ECHO(delta[X_AXIS]);
-    SERIAL_ECHOPGM(" y=");
-    SERIAL_ECHO(delta[Y_AXIS]);
-    SERIAL_ECHOPGM(" z=");
-    SERIAL_ECHOLN(delta[Z_AXIS]);
+    /*
+    SERIAL_ECHOPGM("delta x="); SERIAL_ECHO(delta[X_AXIS]);
+    SERIAL_ECHOPGM(" y="); SERIAL_ECHO(delta[Y_AXIS]);
+    SERIAL_ECHOPGM(" z="); SERIAL_ECHOLN(delta[Z_AXIS]);
+    */
     plan_buffer_line(delta[X_AXIS], delta[Y_AXIS], delta[Z_AXIS],
 		     destination[E_AXIS], feedrate*feedmultiply/60/100.0,
 		     active_extruder);
