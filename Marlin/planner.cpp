@@ -783,9 +783,6 @@ void plan_buffer_line(const float &x, const float &y, const float &z, const floa
     */
   #endif // ADVANCE
 
-
-
-
   calculate_trapezoid_for_block(block, block->entry_speed/block->nominal_speed,
     MINIMUM_PLANNER_SPEED/block->nominal_speed);
 
