@@ -41,7 +41,7 @@
 
 #define DELTA_HOMING_OFFSET 128.0 // mm
 #define DELTA_DIAGONAL_ROD 250.0 // mm
-#define DELTA_SEGMENTS_PER_MM 5 // make delta curves from many straight lines
+#define DELTA_SEGMENTS_PER_SECOND 200 // make delta curves from many straight lines
 #define DELTA_ZERO_OFFSET -9 // print surface is lower than bottom endstops
 
 #define SIN_60 0.8660254037844386
@@ -1385,14 +1385,14 @@ void prepare_move() {
 			    sq(difference[Y_AXIS]) +
 			    sq(difference[Z_AXIS]));
   if ( cartesian_mm < 0.000001 ) {
-    cartesian_mm = difference[E_AXIS];
-  }
-  if ( cartesian_mm < 0.000001 ) {
     return;
   }
-  // SERIAL_ECHOPGM("cartesian_mm="); SERIAL_ECHOLN(cartesian_mm);
-  // float inverse_mm = 1.0/cartesian_mm;  // Avoid multiple divides
-  int steps = max(1, int(DELTA_SEGMENTS_PER_MM * cartesian_mm));
+  float seconds = 6000 * cartesian_mm / feedrate / feedmultiply;
+  int steps = max(1, int(DELTA_SEGMENTS_PER_SECOND * seconds));
+  SERIAL_ECHOPGM("mm="); SERIAL_ECHO(cartesian_mm);
+  SERIAL_ECHOPGM(" seconds="); SERIAL_ECHO(seconds);
+  SERIAL_ECHOPGM(" steps="); SERIAL_ECHOLN(steps);
+
   float delta[3];
   for (int s = 1; s <= steps; s++) {
     float fraction = float(s) / float(steps);
