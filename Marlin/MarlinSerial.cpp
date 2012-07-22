@@ -1,35 +1,34 @@
 /*
-  HardwareSerial.cpp - Hardware serial library for Wiring
-  Copyright (c) 2006 Nicholas Zambetti.  All right reserved.
+HardwareSerial.cpp - Hardware serial library for Wiring
+Copyright (c) 2006 Nicholas Zambetti. All right reserved.
 
-  This library is free software; you can redistribute it and/or
-  modify it under the terms of the GNU Lesser General Public
-  License as published by the Free Software Foundation; either
-  version 2.1 of the License, or (at your option) any later version.
+This library is free software; you can redistribute it and/or
+modify it under the terms of the GNU Lesser General Public
+License as published by the Free Software Foundation; either
+version 2.1 of the License, or (at your option) any later version.
 
-  This library is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  Lesser General Public License for more details.
+This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+Lesser General Public License for more details.
 
-  You should have received a copy of the GNU Lesser General Public
-  License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  
-  Modified 23 November 2006 by David A. Mellis
-  Modified 28 September 2010 by Mark Sproul
+You should have received a copy of the GNU Lesser General Public
+License along with this library; if not, write to the Free Software
+Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+Modified 23 November 2006 by David A. Mellis
+Modified 28 September 2010 by Mark Sproul
 */
 
 #include "Marlin.h"
 #include "MarlinSerial.h"
 
-#if MOTHERBOARD != 8 // !teensylu
-// this next line disables the entire HardwareSerial.cpp, 
+#if !defined(__AVR_AT90USB1286__) && !defined(__AVR_AT90USB1287__)
+// this next line disables the entire HardwareSerial.cpp,
 // this is so I can support Attiny series and any other chip without a uart
 #if defined(UBRRH) || defined(UBRR0H) || defined(UBRR1H) || defined(UBRR2H) || defined(UBRR3H)
 
 #if defined(UBRRH) || defined(UBRR0H)
-  ring_buffer rx_buffer  =  { { 0 }, 0, 0 };
+  ring_buffer rx_buffer = { { 0 }, 0, 0 };
 #endif
 
 FORCE_INLINE void store_char(unsigned char c)
@@ -54,9 +53,9 @@ FORCE_INLINE void store_char(unsigned char c)
   SIGNAL(USART0_RX_vect)
   {
   #if defined(UDR0)
-    unsigned char c  =  UDR0;
+    unsigned char c = UDR0;
   #elif defined(UDR)
-    unsigned char c  =  UDR;  //  atmega8, atmega32
+    unsigned char c = UDR; // atmega8, atmega32
   #else
     #error UDR not defined
   #endif
@@ -108,7 +107,7 @@ void MarlinSerial::end()
 {
   cbi(UCSR0B, RXEN0);
   cbi(UCSR0B, TXEN0);
-  cbi(UCSR0B, RXCIE0);  
+  cbi(UCSR0B, RXCIE0);
 }
 
 
@@ -205,7 +204,7 @@ void MarlinSerial::print(double n, int digits)
 void MarlinSerial::println(void)
 {
   print('\r');
-  print('\n');  
+  print('\n');
 }
 
 void MarlinSerial::println(const String &s)
@@ -266,13 +265,13 @@ void MarlinSerial::println(double n, int digits)
 
 void MarlinSerial::printNumber(unsigned long n, uint8_t base)
 {
-  unsigned char buf[8 * sizeof(long)]; // Assumes 8-bit chars. 
+  unsigned char buf[8 * sizeof(long)]; // Assumes 8-bit chars.
   unsigned long i = 0;
 
   if (n == 0) {
     print('0');
     return;
-  } 
+  }
 
   while (n > 0) {
     buf[i++] = n % base;
@@ -285,8 +284,8 @@ void MarlinSerial::printNumber(unsigned long n, uint8_t base)
       'A' + buf[i - 1] - 10));
 }
 
-void MarlinSerial::printFloat(double number, uint8_t digits) 
-{ 
+void MarlinSerial::printFloat(double number, uint8_t digits)
+{
   // Handle negative numbers
   if (number < 0.0)
   {
@@ -308,7 +307,7 @@ void MarlinSerial::printFloat(double number, uint8_t digits)
 
   // Print the decimal point, but only if there are digits beyond
   if (digits > 0)
-    print("."); 
+    print(".");
 
   // Extract digits from the remainder one at a time
   while (digits-- > 0)
@@ -316,8 +315,8 @@ void MarlinSerial::printFloat(double number, uint8_t digits)
     remainder *= 10.0;
     int toPrint = int(remainder);
     print(toPrint);
-    remainder -= toPrint; 
-  } 
+    remainder -= toPrint;
+  }
 }
 // Preinstantiate Objects //////////////////////////////////////////////////////
 
@@ -325,5 +324,4 @@ void MarlinSerial::printFloat(double number, uint8_t digits)
 MarlinSerial MSerial;
 
 #endif // whole file
-#endif //teensylu
-
+#endif //!(__AVR_AT90USB1286__)&&!defined(__AVR_AT90USB1287__)
