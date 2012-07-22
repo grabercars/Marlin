@@ -1,5 +1,5 @@
-#ifndef __CARDREADERH
-#define __CARDREADERH
+#ifndef CARDREADER_H
+#define CARDREADER_H
 
 #ifdef SDSUPPORT
 
@@ -15,7 +15,7 @@ public:
   //files auto[0-9].g on the sd card are performed in a row
   //this is to delay autostart and hence the initialisaiton of the sd card to some seconds after the normal init, so the device is available quick after a reset
 
-  void checkautostart(bool x); 
+  void checkautostart(bool x);
   void openFile(char* name,bool read);
   void removeFile(char* name);
   void closefile();
@@ -36,14 +36,14 @@ public:
 
 
   FORCE_INLINE bool eof() { return sdpos>=filesize ;};
-  FORCE_INLINE int16_t get() {  sdpos = file.curPosition();return (int16_t)file.read();};
+  FORCE_INLINE int16_t get() { sdpos = file.curPosition();return (int16_t)file.read();};
   FORCE_INLINE void setIndex(long index) {sdpos = index;file.seekSet(index);};
   FORCE_INLINE uint8_t percentDone(){if(!sdprinting) return 0; if(filesize) return sdpos*100/filesize; else return 0;};
   FORCE_INLINE char* getWorkDirName(){workDir.getFilename(filename);return filename;};
 
 public:
   bool saving;
-  bool sdprinting ;  
+  bool sdprinting ;
   bool cardOK ;
   char filename[12];
   bool filenameIsDir;
