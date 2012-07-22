@@ -36,6 +36,21 @@ http://reprap.org/pipermail/reprap-dev/2011-May/003323.html
 
 #define VERSION_STRING "1.0.0 RC2"
 
+#define DELTA_HOMING_OFFSET 128.0 // mm
+#define DELTA_DIAGONAL_ROD 250.0 // mm
+#define DELTA_SEGMENTS_PER_SECOND 200 // make delta curves from many straight lines
+#define DELTA_ZERO_OFFSET -9 // print surface is lower than bottom endstops
+
+#define SIN_60 0.8660254037844386
+#define COS_60 0.5
+#define DELTA_RADIUS (175.0-33.0-18.0)
+#define DELTA_TOWER1_X -SIN_60*DELTA_RADIUS
+#define DELTA_TOWER1_Y -COS_60*DELTA_RADIUS
+#define DELTA_TOWER2_X SIN_60*DELTA_RADIUS
+#define DELTA_TOWER2_Y -COS_60*DELTA_RADIUS
+#define DELTA_TOWER3_X 0.0
+#define DELTA_TOWER3_Y DELTA_RADIUS
+
 // look here for descriptions of gcodes: http://linuxcnc.org/handbook/gcode/g-code.html
 // http://objects.reprap.org/wiki/Mendel_User_Manual:_RepRapGCodes
 
