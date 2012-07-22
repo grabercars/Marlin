@@ -22,7 +22,7 @@ CardReader::CardReader()
    lastnr=0;
   //power to SD reader
   #if SDPOWER > -1
-    SET_OUTPUT(SDPOWER); 
+    SET_OUTPUT(SDPOWER);
     WRITE(SDPOWER,HIGH);
   #endif //SDPOWER
   
@@ -32,10 +32,10 @@ CardReader::CardReader()
 char *createFilename(char *buffer,const dir_t &p) //buffer>12characters
 {
   char *pos=buffer;
-  for (uint8_t i = 0; i < 11; i++) 
+  for (uint8_t i = 0; i < 11; i++)
   {
     if (p.name[i] == ' ')continue;
-    if (i == 8) 
+    if (i == 8)
     {
       *pos++='.';
     }
@@ -46,7 +46,7 @@ char *createFilename(char *buffer,const dir_t &p) //buffer>12characters
 }
 
 
-void  CardReader::lsDive(const char *prepend,SdFile parent)
+void CardReader::lsDive(const char *prepend,SdFile parent)
 {
   dir_t p;
  uint8_t cnt=0;
@@ -115,7 +115,7 @@ void  CardReader::lsDive(const char *prepend,SdFile parent)
       else if(lsAction==LS_Count)
       {
         nrFiles++;
-      } 
+      }
       else if(lsAction==LS_GetFilename)
       {
         if(cnt==nrFiles)
@@ -127,7 +127,7 @@ void  CardReader::lsDive(const char *prepend,SdFile parent)
   }
 }
 
-void CardReader::ls() 
+void CardReader::ls()
 {
   lsAction=LS_SerialPrint;
   if(lsAction==LS_Count)
@@ -154,12 +154,12 @@ void CardReader::initsd()
     SERIAL_ERROR_START;
     SERIAL_ERRORLNPGM(MSG_SD_VOL_INIT_FAIL);
   }
-  else if (!root.openRoot(&volume)) 
+  else if (!root.openRoot(&volume))
   {
     SERIAL_ERROR_START;
     SERIAL_ERRORLNPGM(MSG_SD_OPENROOT_FAIL);
   }
-  else 
+  else
   {
     cardOK = true;
     SERIAL_ECHO_START;
@@ -168,20 +168,20 @@ void CardReader::initsd()
   workDir=root;
   curDir=&root;
   /*
-  if(!workDir.openRoot(&volume))
-  {
-    SERIAL_ECHOLNPGM(MSG_SD_WORKDIR_FAIL);
-  }
-  */
+if(!workDir.openRoot(&volume))
+{
+SERIAL_ECHOLNPGM(MSG_SD_WORKDIR_FAIL);
+}
+*/
   
 }
 
 void CardReader::setroot()
 {
   /*if(!workDir.openRoot(&volume))
-  {
-    SERIAL_ECHOLNPGM(MSG_SD_WORKDIR_FAIL);
-  }*/
+{
+SERIAL_ECHOLNPGM(MSG_SD_WORKDIR_FAIL);
+}*/
   workDir=root;
   
   curDir=&workDir;
@@ -231,7 +231,7 @@ void CardReader::openFile(char* name,bool read)
     {
       dirname_end=strchr(dirname_start,'/');
       //SERIAL_ECHO("start:");SERIAL_ECHOLN((int)(dirname_start-name));
-      //SERIAL_ECHO("end  :");SERIAL_ECHOLN((int)(dirname_end-name));
+      //SERIAL_ECHO("end :");SERIAL_ECHOLN((int)(dirname_end-name));
       if(dirname_end>0 && dirname_end>dirname_start)
       {
         char subdirname[13];
@@ -248,7 +248,7 @@ void CardReader::openFile(char* name,bool read)
         else
           ;//SERIAL_ECHOLN("dive ok");
           
-        curDir=&myDir; 
+        curDir=&myDir;
         dirname_start=dirname_end+1;
       }
       else // the reminder after all /fsa/fdsa/ is the filename
@@ -267,7 +267,7 @@ void CardReader::openFile(char* name,bool read)
   }
   if(read)
   {
-    if (file.open(curDir, fname, O_READ)) 
+    if (file.open(curDir, fname, O_READ))
     {
       filesize = file.fileSize();
       SERIAL_PROTOCOLPGM(MSG_SD_FILE_OPENED);
@@ -286,7 +286,7 @@ void CardReader::openFile(char* name,bool read)
       SERIAL_PROTOCOLLNPGM(".");
     }
   }
-  else 
+  else
   { //write
     if (!file.open(curDir, fname, O_CREAT | O_APPEND | O_WRITE | O_TRUNC))
     {
@@ -325,7 +325,7 @@ void CardReader::removeFile(char* name)
     {
       dirname_end=strchr(dirname_start,'/');
       //SERIAL_ECHO("start:");SERIAL_ECHOLN((int)(dirname_start-name));
-      //SERIAL_ECHO("end  :");SERIAL_ECHOLN((int)(dirname_end-name));
+      //SERIAL_ECHO("end :");SERIAL_ECHOLN((int)(dirname_end-name));
       if(dirname_end>0 && dirname_end>dirname_start)
       {
         char subdirname[13];
@@ -342,7 +342,7 @@ void CardReader::removeFile(char* name)
         else
           ;//SERIAL_ECHOLN("dive ok");
           
-        curDir=&myDir; 
+        curDir=&myDir;
         dirname_start=dirname_end+1;
       }
       else // the reminder after all /fsa/fdsa/ is the filename
@@ -359,7 +359,7 @@ void CardReader::removeFile(char* name)
   {
     curDir=&workDir;
   }
-    if (file.remove(curDir, fname)) 
+    if (file.remove(curDir, fname))
     {
       SERIAL_PROTOCOLPGM("File deleted:");
       SERIAL_PROTOCOL(fname);
@@ -436,7 +436,7 @@ void CardReader::checkautostart(bool force)
   root.rewind();
   
   bool found=false;
-  while (root.readDir(p) > 0) 
+  while (root.readDir(p) > 0)
   {
     for(int8_t i=0;i<(int)strlen((char*)p.name);i++)
     p.name[i]=tolower(p.name[i]);
@@ -464,7 +464,7 @@ void CardReader::closefile()
 {
   file.sync();
   file.close();
-  saving = false; 
+  saving = false;
 }
 
 void CardReader::getfilename(const uint8_t nr)
