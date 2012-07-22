@@ -1,22 +1,22 @@
 /*
-  HardwareSerial.h - Hardware serial library for Wiring
-  Copyright (c) 2006 Nicholas Zambetti.  All right reserved.
+HardwareSerial.h - Hardware serial library for Wiring
+Copyright (c) 2006 Nicholas Zambetti. All right reserved.
 
-  This library is free software; you can redistribute it and/or
-  modify it under the terms of the GNU Lesser General Public
-  License as published by the Free Software Foundation; either
-  version 2.1 of the License, or (at your option) any later version.
+This library is free software; you can redistribute it and/or
+modify it under the terms of the GNU Lesser General Public
+License as published by the Free Software Foundation; either
+version 2.1 of the License, or (at your option) any later version.
 
-  This library is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  Lesser General Public License for more details.
+This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+Lesser General Public License for more details.
 
-  You should have received a copy of the GNU Lesser General Public
-  License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+You should have received a copy of the GNU Lesser General Public
+License along with this library; if not, write to the Free Software
+Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-  Modified 28 September 2010 by Mark Sproul
+Modified 28 September 2010 by Mark Sproul
 */
 
 #ifndef MarlinSerial_h
@@ -31,8 +31,8 @@
 #define BYTE 0
 
 
-#if MOTHERBOARD != 8 // ! teensylu
-// Define constants and variables for buffering incoming serial data.  We're
+#if !defined(__AVR_AT90USB1286__) && !defined(__AVR_AT90USB1287__)
+// Define constants and variables for buffering incoming serial data. We're
 // using a ring buffer (I think), in which rx_buffer_head is the index of the
 // location to which to write the next incoming character and rx_buffer_tail
 // is the index of the location from which to read.
@@ -78,7 +78,7 @@ class MarlinSerial //: public Stream
     FORCE_INLINE void checkRx(void)
     {
       if((UCSR0A & (1<<RXC0)) != 0) {
-        unsigned char c  =  UDR0;
+        unsigned char c = UDR0;
         int i = (unsigned int)(rx_buffer.head + 1) % RX_BUFFER_SIZE;
 
         // if we should be storing the received character into the location
@@ -145,6 +145,6 @@ class MarlinSerial //: public Stream
 };
 
 extern MarlinSerial MSerial;
-#endif // ! teensylu
+#endif // !defined(__AVR_AT90USB1286__) && !defined(__AVR_AT90USB1287__)
 
 #endif
